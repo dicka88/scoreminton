@@ -6,24 +6,19 @@ private enum SheetKind: String, Identifiable {
     var id: String { rawValue }
 }
 
-private struct Toast: Equatable {
-    var id = UUID()
-    var side: Side
-    var text: String
-}
-
 struct ScoreboardView: View {
     @Environment(MatchStore.self) private var store
     let match: MatchState
     var onExit: () -> Void
     var onFinish: () -> Void
     var onAbandon: () -> Void
+    /// Storage problem to show over the board (never blocks scoring).
+    var notice: String? = nil
 
     @State private var sheet: SheetKind?
     /// Menu is a card over the board (a sheet goes full screen in phone landscape).
     @State private var showMenu = false
     @State private var confirmAbandon = false
-    @State private var toast: Toast?
     /// Ignore taps that land while the board is still appearing (finger from the previous screen).
     @State private var readyAt = Date().addingTimeInterval(0.4)
 
@@ -53,8 +48,8 @@ struct ScoreboardView: View {
         }
         .ignoresSafeArea()
         .background(Theme.paper.ignoresSafeArea())
-        .overlay(alignment: .top) { toastView }
         .overlay { modal }
+        .overlay(alignment: .top) { if let notice { NoticeBanner(text: notice) } }
         .overlay { if showMenu { menuCard } }
         .animation(.easeOut(duration: 0.15), value: showMenu)
         .background { keyboardShortcuts }
@@ -65,22 +60,28 @@ struct ScoreboardView: View {
             case .log: logSheet
             }
         }
-        .alert("Batalkan pertandingan?", isPresented: $confirmAbandon) {
-            Button("Tidak", role: .cancel) {}
-            Button("Ya, batalkan", role: .destructive, action: onAbandon)
+        .alert("Akhiri tanpa menyimpan?", isPresented: $confirmAbandon) {
+            Button("Kembali", role: .cancel) {}
+            Button("Ya, akhiri", role: .destructive, action: onAbandon)
         } message: {
-            Text("Skor tidak disimpan ke riwayat.")
+            Text("Skor \(g.score[left])–\(g.score[right]) di game \(match.games.count) dibuang dan tidak masuk riwayat.")
         }
         .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
         .onChange(of: match.status) { _, s in
             if s == .matchOver { Haptics.success() }
         }
-        .task(id: toast) {
-            guard toast != nil else { return }
-            try? await Task.sleep(for: .seconds(2.6))
-            if !Task.isCancelled { withAnimation { toast = nil } }
+        .onChange(of: announcement) { _, text in
+            // VoiceOver hears every score change, including undo
+            if !text.isEmpty { AccessibilityNotification.Announcement(text).post() }
         }
+    }
+
+    private var announcement: String {
+        guard match.status == .playing else { return "" }
+        let server = cfg.playerName(g.servingTeam, g.server)
+        let court = cfg.serviceCourt(g) == .R ? "kanan" : "kiri"
+        return "\(cfg.sideTitle(left)) \(g.score[left]), \(cfg.sideTitle(right)) \(g.score[right]). \(server) servis dari kotak \(court)."
     }
 
     // MARK: - Actions
@@ -88,17 +89,12 @@ struct ScoreboardView: View {
     private func score(_ s: Side) {
         guard match.status == .playing, sheet == nil, !showMenu, !confirmAbandon, Date() >= readyAt else { return }
         Haptics.tap()
-        let point = cfg.scoring == .rally || g.servingTeam == s
-        withAnimation(.snappy) {
-            toast = Toast(side: s, text: point ? "+1 \(cfg.sideTitle(s))" : "Servis → \(cfg.sideTitle(s))")
-        }
         store.rally(s)
     }
 
     private func undo() {
         guard store.canUndo else { return }
         Haptics.light()
-        toast = nil
         withAnimation(.snappy) { store.undo() }
     }
 
@@ -138,11 +134,20 @@ struct ScoreboardView: View {
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("Game dimenangkan \(won[left]) lawan \(won[right])")
                 }
+                if extended {
+                    Text(cfg.scoring == .rally ? "Deuce" : "Setting \(cfg.cap)")
+                        .font(.display(11 * k, .heavy))
+                        .foregroundStyle(Theme.ink)
+                        .padding(.horizontal, 8).padding(.vertical, 2)
+                        .background(Theme.sun, in: .capsule)
+                        .fixedSize()
+                        .padding(.top, 2)
+                }
             }
             .frame(minWidth: 56)
             if landscape { Spacer(minLength: 0) }
             iconButton("Undo", "arrow.uturn.backward", k: k, disabled: !store.canUndo, action: undo)
-            iconButton("Sisi", landscape ? "arrow.left.arrow.right" : "arrow.up.arrow.down", k: k) {
+            HoldButton(title: "Sisi", symbol: landscape ? "arrow.left.arrow.right" : "arrow.up.arrow.down", k: k) {
                 withAnimation(.snappy) { store.swapSides() }
             }
             iconButton("Log", "list.bullet", k: k) { sheet = .log }
@@ -176,26 +181,9 @@ struct ScoreboardView: View {
         .accessibilityLabel(title == "Sisi" ? "Tukar sisi" : title)
     }
 
-    // MARK: - Toast
-
-    @ViewBuilder private var toastView: some View {
-        if let toast, match.status == .playing {
-            HStack(spacing: 10) {
-                Circle().fill(Theme.team(toast.side)).frame(width: 10, height: 10)
-                Text(toast.text).font(.display(15, .bold)).lineLimit(1)
-                Button("Batalkan", action: undo)
-                    .font(.display(15, .heavy))
-                    .foregroundStyle(Theme.sun)
-            }
-            .foregroundStyle(.white)
-            .padding(.leading, 16).padding(.trailing, 8)
-            .frame(minHeight: 44)
-            .padding(.trailing, 8)
-            .background(Theme.ink.opacity(0.92), in: .capsule)
-            .padding(.top, 14)
-            .transition(.move(edge: .top).combined(with: .opacity))
-            .id(toast.id)
-        }
+    /// Deuce (rally) or setting (service-over) is on once both sides reach target − 1.
+    private var extended: Bool {
+        cfg.deuce && match.status == .playing && min(g.score.A, g.score.B) >= cfg.target - 1
     }
 
     // MARK: - Modals
@@ -206,7 +194,7 @@ struct ScoreboardView: View {
             EmptyView()
         case .interval:
             ModalCard {
-                Eyebrow("Interval · Game \(match.games.count)")
+                Text("Interval game \(match.games.count)").font(.display(24, .heavy)).foregroundStyle(Theme.ink)
                 scoreLine(g.score[left], g.score[right], left, right)
                 if cfg.isDecidingGame(match.games.count - 1) { Callout("Pindah sisi lapangan") }
                 Text("Istirahat maksimal 60 detik. Minum dulu!").foregroundStyle(Theme.muted)
@@ -215,11 +203,12 @@ struct ScoreboardView: View {
         case .gameOver:
             let w = g.winner ?? .A
             ModalCard {
-                Eyebrow("Game \(match.games.count) selesai")
-                Text(cfg.sideTitle(w)).font(.display(30, .heavy)).foregroundStyle(Theme.team(w))
+                (Text(cfg.headTitle(w)).foregroundColor(Theme.team(w)) + Text(" menang game \(match.games.count)"))
+                    .font(.display(28, .heavy))
+                    .foregroundStyle(Theme.ink)
                     .multilineTextAlignment(.center)
                 scoreLine(g.score[w], g.score[w.other], w, w.other)
-                Callout("Pindah sisi · \(cfg.sideTitle(w)) servis duluan")
+                Callout("Pindah sisi · \(cfg.headTitle(w)) servis duluan")
                 actions(primary: "Mulai game \(match.games.count + 1)") {
                     withAnimation(.snappy) { store.nextGame() }
                 }
@@ -229,8 +218,9 @@ struct ScoreboardView: View {
             ZStack {
                 ModalCard {
                     Trophy()
-                    Eyebrow("Selamat, juaranya!")
-                    Text(cfg.sideTitle(w)).font(.display(30, .heavy)).foregroundStyle(Theme.team(w))
+                    (Text(cfg.headTitle(w)).foregroundColor(Theme.team(w)) + Text(" menang!"))
+                        .font(.display(30, .heavy))
+                        .foregroundStyle(Theme.ink)
                         .multilineTextAlignment(.center)
                     HStack(spacing: 14) {
                         ForEach(Array(match.games.enumerated()), id: \.offset) { _, x in
@@ -289,7 +279,7 @@ struct ScoreboardView: View {
                                     .foregroundStyle(Theme.team(r.winner))
                                     .frame(width: 64)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(r.point ? "Poin \(cfg.sideTitle(r.winner))" : "Pindah servis → \(cfg.sideTitle(r.winner))")
+                                    Text(r.point ? "Poin \(cfg.headTitle(r.winner))" : "Pindah servis → \(cfg.headTitle(r.winner))")
                                         .font(.subheadline.weight(.semibold))
                                     Text("servis: \(cfg.playerName(r.servingTeam, r.server))")
                                         .font(.caption)
@@ -313,7 +303,7 @@ struct ScoreboardView: View {
 
     private var menuCard: some View {
         ModalCard(onDismiss: { showMenu = false }) {
-            Eyebrow("Menu")
+            Text("Menu").font(.display(22, .heavy)).foregroundStyle(Theme.ink)
             Text(cfg.modeLabel)
                 .font(.subheadline)
                 .foregroundStyle(Theme.muted)
@@ -323,7 +313,7 @@ struct ScoreboardView: View {
                 onExit()
             }
             .buttonStyle(GhostButtonStyle())
-            Button("Batalkan pertandingan") {
+            Button("Akhiri tanpa menyimpan") {
                 showMenu = false
                 confirmAbandon = true
             }
@@ -345,6 +335,85 @@ struct ScoreboardView: View {
         }
         .opacity(0)
         .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Controls
+
+/// Acts only after a deliberate press-and-hold, so a stray tap mid-rally does nothing.
+/// A short tap says "Tahan" instead of silently ignoring the touch.
+private struct HoldButton: View {
+    let title: String
+    let symbol: String
+    var k: CGFloat = 1
+    var duration: Double = 0.6
+    let onHold: () -> Void
+
+    @State private var progress: CGFloat = 0
+    @State private var fired = false
+    @State private var nudge = false
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Image(systemName: symbol).font(.system(size: 20 * k, weight: .semibold))
+            Text(nudge ? "Tahan" : title).font(.display(11 * k, .bold))
+        }
+        .frame(width: 56 * k, height: 50 * k)
+        .foregroundStyle(Theme.ink)
+        .background(alignment: .bottom) {
+            // fill rises while held; full = swap
+            GeometryReader { geo in
+                Theme.blueMid.frame(height: geo.size.height * progress).frame(maxHeight: .infinity, alignment: .bottom)
+            }
+        }
+        .background(Theme.field)
+        .clipShape(.rect(cornerRadius: 16, style: .continuous))
+        .contentShape(.rect)
+        .onLongPressGesture(minimumDuration: duration, maximumDistance: 20) {
+            fired = true
+            Haptics.tap()
+            onHold()
+        } onPressingChanged: { pressing in
+            if pressing {
+                fired = false
+                nudge = false
+                withAnimation(.linear(duration: duration)) { progress = 1 }
+            } else {
+                withAnimation(.easeOut(duration: 0.15)) { progress = 0 }
+            }
+        }
+        // released too early: say how it works instead of silently ignoring the tap
+        .simultaneousGesture(TapGesture().onEnded { if !fired { nudge = true } })
+        .task(id: nudge) {
+            guard nudge else { return }
+            try? await Task.sleep(for: .seconds(1.4))
+            if !Task.isCancelled { nudge = false }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Tukar sisi layar")
+        .accessibilityHint("Tekan dan tahan")
+        .accessibilityAddTraits(.isButton)
+        // VoiceOver and Switch Control users act on purpose; no hold needed
+        .accessibilityAction { onHold() }
+    }
+}
+
+/// Storage problem banner: stays visible, never intercepts taps.
+struct NoticeBanner: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.display(14, .bold))
+            .foregroundStyle(.white)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 16).padding(.vertical, 10)
+            .background(Theme.danger, in: .rect(cornerRadius: 16, style: .continuous))
+            .shadow(color: Theme.ink.opacity(0.25), radius: 12, y: 6)
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .frame(maxWidth: 560)
+            .allowsHitTesting(false)
+            .accessibilityAddTraits(.isStaticText)
     }
 }
 
@@ -373,14 +442,6 @@ private struct ModalCard<Content: View>: View {
             .defaultScrollAnchor(.center)
         }
         .transition(.opacity)
-    }
-}
-
-private struct Eyebrow: View {
-    let text: String
-    init(_ text: String) { self.text = text }
-    var body: some View {
-        Text(text).font(.display(13, .heavy)).textCase(.uppercase).foregroundStyle(Theme.muted)
     }
 }
 

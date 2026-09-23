@@ -135,17 +135,22 @@ open Scoreminton.xcodeproj # Run (⌘R) di simulator / device, Test (⌘U)
 ```
 
 - `ios/Scoreminton/Engine/` — aturan skor (port dari `src/engine/`)
-- `ios/Scoreminton/Store/` — undo stack + simpan JSON di Application Support
+- `ios/Scoreminton/Store/` — state awal + daftar aksi (format sama dengan web), undo = replay, JSON di Application Support
 - `ios/Scoreminton/Screens/`, `Components/` — UI SwiftUI
-- `ios/ScoremintonTests/` — unit test engine, `ios/ScoremintonUITests/` — smoke test UI
+- `ios/ScoremintonTests/` — unit test engine & store, `ios/ScoremintonUITests/` — smoke test UI
 
 Keyboard iPad: `←` / `→` poin sisi kiri/kanan, `⌫` / `Z` undo.
 
-> Perbaikan UX terbaru di web (skor saat jari diangkat, konfirmasi ganti match, penyimpanan berbasis replay, tahan untuk tukar sisi) belum di-port ke iOS.
+Perilaku iOS mengikuti web: konfirmasi sebelum mengganti match yang berjalan, peringatan kalau penyimpanan gagal, tahan untuk tukar sisi, Main lagi + mulai cepat 2×2, skor diumumkan ke VoiceOver, dan indikator Deuce / Setting.
+
+```bash
+# test dari command line (unit + UI)
+xcodebuild -project Scoreminton.xcodeproj -scheme Scoreminton \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' test
+```
 
 ## Rencana
 
-- Port perbaikan UX web ke iOS
 - Input clicker / remote Bluetooth (PageUp / PageDown)
 - Timer interval 60 / 120 detik
 - Bagikan hasil sebagai gambar atau teks WhatsApp

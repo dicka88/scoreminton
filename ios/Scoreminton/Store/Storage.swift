@@ -14,7 +14,7 @@ enum Storage {
         return url
     }()
 
-    /// Serial queue so large undo stacks are encoded off the main thread, in order.
+    /// Serial queue so writes happen off the main thread, in order.
     private static let queue = DispatchQueue(label: "scoreminton.storage", qos: .utility)
 
     static func read<T: Decodable>(_ name: String, as: T.Type = T.self) -> T? {
@@ -22,17 +22,28 @@ enum Storage {
         return try? JSONDecoder().decode(T.self, from: data)
     }
 
-    static func write<T: Encodable & Sendable>(_ name: String, _ value: T?) {
+    /// Write (or delete, for nil) and report whether it landed, so the UI can warn instead of
+    /// failing silently. Returns false when the disk is full or the file can't be written.
+    @discardableResult
+    static func writeNow<T: Encodable>(_ name: String, _ value: T?) -> Bool {
         let url = dir.appendingPathComponent(name)
+        guard let value else {
+            try? FileManager.default.removeItem(at: url)
+            return true
+        }
+        do {
+            try JSONEncoder().encode(value).write(to: url, options: .atomic)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Background write; `done` runs on the main queue with the result.
+    static func write<T: Encodable & Sendable>(_ name: String, _ value: T?, done: (@MainActor @Sendable (Bool) -> Void)? = nil) {
         queue.async {
-            guard let value else {
-                try? FileManager.default.removeItem(at: url)
-                return
-            }
-            // storage failure (disk full) — app keeps working in memory
-            if let data = try? JSONEncoder().encode(value) {
-                try? data.write(to: url, options: .atomic)
-            }
+            let ok = writeNow(name, value)
+            if let done { Task { @MainActor in done(ok) } }
         }
     }
 
@@ -40,7 +51,31 @@ enum Storage {
     static func flush() { queue.sync {} }
 }
 
-struct ActiveSnapshot: Codable, Sendable {
+/// One user action on the active match. Replaying the ops over `base` rebuilds the present state.
+struct Op: Codable, Equatable, Sendable {
+    enum Kind: String, Codable, Sendable {
+        case rally, resume, nextGame, swapSides, swapPositions, firstServer
+    }
+    var t: Kind
+    var side: Side?
+    var at: Date?
+
+    static func rally(_ side: Side, at: Date = .now) -> Op { Op(t: .rally, side: side, at: at) }
+
+    /// Modal dismissals ride along with the rally before them, so one undo reverts that rally.
+    var rides: Bool { t == .resume || t == .nextGame }
+}
+
+/// Persisted active match: the starting state plus the list of actions.
+/// Kilobytes for a full match, versus megabytes for a stack of full snapshots.
+struct StoredMatch: Codable, Sendable {
+    var v = 2
+    var base: MatchState
+    var ops: [Op]
+}
+
+/// v1 format: full-state undo stack. Still read so a match in progress survives the update.
+struct LegacySnapshot: Codable, Sendable {
     var past: [MatchState]
     var present: MatchState
 }

@@ -99,6 +99,9 @@ struct SetupView: View {
                 Text("Best of 3").tag(3)
             }
             .pickerStyle(.segmented)
+            Text(cfg.bestOf == 3 ? "Menang 2 game dari 3." : "Satu game menentukan pemenang.")
+                .font(.footnote)
+                .foregroundStyle(Theme.muted)
 
             DisclosureGroup(isExpanded: $showAdvanced) {
                 VStack(alignment: .leading, spacing: 8) {
@@ -191,6 +194,13 @@ struct SetupView: View {
                     TextField(placeholder(i), text: $cfg.teams[s].players[i])
                         .textInputAutocapitalization(.words)
                         .autocorrectionDisabled()
+                    if cfg.format == .double {
+                        // stays visible while typing, unlike a placeholder
+                        Text(i == 0 ? "mulai kanan" : "mulai kiri")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(Theme.muted)
+                            .frame(minWidth: 76, alignment: .trailing)
+                    }
                 }
             }
             Toggle("Servis duluan", isOn: Binding(
@@ -213,7 +223,7 @@ struct SetupView: View {
 
     private func placeholder(_ i: Int) -> String {
         if cfg.format == .single { return "Nama pemain" }
-        return i == 0 ? "Pemain 1 · mulai di kanan" : "Pemain 2 · mulai di kiri"
+        return "Pemain \(i + 1)"
     }
 
     private var actionBar: some View {

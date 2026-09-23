@@ -1,23 +1,31 @@
 import Foundation
 import Observation
 
-/// Active match with an undo stack, persisted on every change.
+/// Active match as a starting state plus an action log, persisted on every change.
+/// Undo drops the last action and replays the rest.
 @Observable
 final class MatchStore {
     private static let activeFile = "active.json"
     private static let lastConfigFile = "lastConfig.json"
-    private static let maxHistory = 500
 
-    private(set) var past: [MatchState] = []
+    private(set) var base: MatchState?
+    private(set) var ops: [Op] = []
     private(set) var present: MatchState?
+    /// False after a save failed (disk full); the UI shows a warning while it stays false.
+    private(set) var saved = true
 
-    var canUndo: Bool { !past.isEmpty }
+    var canUndo: Bool { ops.contains { !$0.rides } }
 
     init(persist: Bool = true) {
         self.persist = persist
-        if persist, let snap = Storage.read(Self.activeFile, as: ActiveSnapshot.self) {
-            past = snap.past
-            present = snap.present
+        guard persist else { return }
+        if let stored = Storage.read(Self.activeFile, as: StoredMatch.self) {
+            base = stored.base
+            ops = stored.ops
+            present = Self.replay(stored.base, stored.ops)
+        } else if let legacy = Storage.read(Self.activeFile, as: LegacySnapshot.self) {
+            base = legacy.present
+            present = legacy.present
         }
     }
 
@@ -25,51 +33,68 @@ final class MatchStore {
 
     private func save() {
         guard persist else { return }
-        Storage.write(Self.activeFile, present.map { ActiveSnapshot(past: past, present: $0) })
+        let value = base.map { StoredMatch(base: $0, ops: ops) }
+        Storage.write(Self.activeFile, value) { [weak self] ok in self?.saved = ok }
     }
 
-    private func push(_ next: MatchState) {
-        guard let cur = present, next != cur else { return }
-        past.append(cur)
-        if past.count > Self.maxHistory { past.removeFirst(past.count - Self.maxHistory) }
-        present = next
-        save()
+    static func apply(_ m: MatchState, _ op: Op) -> MatchState {
+        switch op.t {
+        case .rally: m.scoringRally(op.side ?? .A, now: op.at ?? .now)
+        case .resume: m.resumedFromInterval()
+        case .nextGame: m.startingNextGame()
+        case .swapSides: m.swappingSides()
+        case .swapPositions: m.swappingPositions(op.side ?? .A)
+        case .firstServer: m.settingFirstServer(op.side ?? .A)
+        }
     }
 
-    private func replace(_ next: MatchState) {
-        guard next != present else { return }
+    static func replay(_ base: MatchState, _ ops: [Op]) -> MatchState {
+        ops.reduce(base, apply)
+    }
+
+    private func record(_ op: Op) {
+        guard let cur = present else { return }
+        let next = Self.apply(cur, op)
+        guard next != cur else { return }
+        ops.append(op)
         present = next
         save()
     }
 
     func new(_ config: MatchConfig) {
         if persist { Storage.write(Self.lastConfigFile, config) }
-        past = []
-        present = .create(config)
+        let m = MatchState.create(config)
+        base = m
+        ops = []
+        present = m
         save()
     }
 
     func clear() {
-        past = []
+        base = nil
+        ops = []
         present = nil
         save()
     }
 
-    func rally(_ side: Side) { if let m = present { push(m.scoringRally(side)) } }
+    func rally(_ side: Side) { record(.rally(side)) }
 
     func undo() {
-        guard let prev = past.popLast() else { return }
-        present = prev
+        guard let base else { return }
+        var rest = ops
+        while let last = rest.last, last.rides { rest.removeLast() }
+        guard !rest.isEmpty else { return }
+        rest.removeLast()
+        ops = rest
+        present = Self.replay(base, rest)
         save()
     }
 
-    // Modal dismissals replace the present so one undo reverts the last rally.
-    func resume() { if let m = present { replace(m.resumedFromInterval()) } }
-    func nextGame() { if let m = present { replace(m.startingNextGame()) } }
-
-    func swapSides() { if let m = present { push(m.swappingSides()) } }
-    func swapPositions(_ side: Side) { if let m = present { push(m.swappingPositions(side)) } }
-    func setFirstServer(_ side: Side) { if let m = present { push(m.settingFirstServer(side)) } }
+    func resume() { record(Op(t: .resume)) }
+    func nextGame() { record(Op(t: .nextGame)) }
+    func swapSides() { record(Op(t: .swapSides)) }
+    func swapPositions(_ side: Side) { record(Op(t: .swapPositions, side: side)) }
+    func setFirstServer(_ side: Side) { record(Op(t: .firstServer, side: side)) }
 
     static func lastConfig() -> MatchConfig? { Storage.read(lastConfigFile) }
 }
@@ -87,18 +112,22 @@ final class HistoryStore {
         records = persist ? (Storage.read(Self.file) ?? []) : []
     }
 
-    private func save() {
-        guard persist else { return }
-        Storage.write(Self.file, records)
+    /// Saved synchronously so the caller knows whether the result is safe before clearing the match.
+    @discardableResult
+    private func save(_ next: [MatchRecord]) -> Bool {
+        guard persist else { records = next; return true }
+        guard Storage.writeNow(Self.file, next) else { return false }
+        records = next
+        return true
     }
 
-    func add(_ r: MatchRecord) {
-        records = [r] + records.filter { $0.id != r.id }
-        save()
+    /// Returns false when the result could not be written (disk full).
+    @discardableResult
+    func add(_ r: MatchRecord) -> Bool {
+        save([r] + records.filter { $0.id != r.id })
     }
 
     func delete(_ id: String) {
-        records.removeAll { $0.id == id }
-        save()
+        save(records.filter { $0.id != id })
     }
 }

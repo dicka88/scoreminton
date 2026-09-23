@@ -39,7 +39,8 @@ extension MatchState {
     }
 
     /// Resolve a rally won by `winner`. Returns a new state; `self` is not mutated.
-    func scoringRally(_ winner: Side) -> MatchState {
+    /// `now` stamps the match end, so replaying a saved action log gives the same state.
+    func scoringRally(_ winner: Side, now: Date = .now) -> MatchState {
         guard status == .playing else { return self }
         let cfg = config
         let gi = games.count - 1
@@ -51,7 +52,7 @@ extension MatchState {
             if next.gamesWon[gw] >= cfg.gamesToWin {
                 next.status = .matchOver
                 next.winner = gw
-                next.endedAt = .now
+                next.endedAt = now
             } else {
                 next.status = .gameOver
             }

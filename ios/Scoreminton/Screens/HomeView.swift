@@ -1,18 +1,13 @@
 import SwiftUI
 
-private struct Quick: Identifiable {
-    var format: Format
-    var scoring: ScoringSystem
-    var title: String
-    var sub: String
-    var id: String { "\(format)-\(scoring)" }
-}
-
-private let quicks: [Quick] = [
-    Quick(format: .double, scoring: .rally, title: "Double", sub: "Rally point · 21"),
-    Quick(format: .single, scoring: .rally, title: "Single", sub: "Rally point · 21"),
-    Quick(format: .double, scoring: .serviceOver, title: "Double", sub: "Service-over · 30"),
-    Quick(format: .single, scoring: .serviceOver, title: "Single", sub: "Service-over · 30"),
+/// Quick-start grid: one row per scoring system, Single and Double in each.
+private let systems: [(scoring: ScoringSystem, title: String, sub: String)] = [
+    (.rally, "Rally point", "21 poin · best of 3"),
+    (.serviceOver, "Service-over", "30 poin · best of 3"),
+]
+private let formats: [(format: Format, title: String)] = [
+    (.single, "Single"),
+    (.double, "Double"),
 ]
 
 /// Quick-start config: best of 3, preset points, last used player names.
@@ -46,16 +41,30 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 22) {
                 header
                 hero
-                if let m = store.present { resumeCard(m) }
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
-                    ForEach(quicks) { q in
-                        Button { onQuickStart(quickConfig(q.format, q.scoring)) } label: { quickCard(q) }
-                            .buttonStyle(.plain)
+                if let m = store.present {
+                    resumeCard(m)
+                } else if let last = MatchStore.lastConfig() {
+                    againCard(last)
+                }
+                ForEach(systems, id: \.scoring) { sys in
+                    VStack(alignment: .leading, spacing: 8) {
+                        (Text(sys.title).font(.display(17, .heavy)).foregroundColor(Theme.ink)
+                            + Text("  \(sys.sub)").font(.subheadline).foregroundColor(Theme.muted))
+                        HStack(spacing: 12) {
+                            ForEach(formats, id: \.format) { f in
+                                Button { onQuickStart(quickConfig(f.format, sys.scoring)) } label: {
+                                    quickCard(f.format, f.title)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("\(f.title), \(sys.title) \(sys.sub)")
+                            }
+                        }
                     }
+                    .accessibilityElement(children: .contain)
                 }
                 Button("Atur sendiri & isi nama pemain", action: onNew)
-                    .buttonStyle(PrimaryButtonStyle())
-                Text("Mulai cepat memakai best of 3 dan nama pemain terakhir.")
+                    .buttonStyle(GhostButtonStyle())
+                Text("Mulai cepat memakai nama pemain terakhir.")
                     .font(.footnote)
                     .foregroundStyle(Theme.muted)
                     .frame(maxWidth: .infinity)
@@ -107,11 +116,11 @@ struct HomeView: View {
                         .foregroundStyle(Theme.muted)
                 }
                 HStack(spacing: 12) {
-                    Text(m.config.sideTitle(.A)).foregroundStyle(Theme.red)
+                    Text(m.config.headTitle(.A)).foregroundStyle(Theme.red)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                     Text("\(g.score.A)").foregroundStyle(Theme.red).font(.display(40, .heavy))
                     Text("\(g.score.B)").foregroundStyle(Theme.blue).font(.display(40, .heavy))
-                    Text(m.config.sideTitle(.B)).foregroundStyle(Theme.blue)
+                    Text(m.config.headTitle(.B)).foregroundStyle(Theme.blue)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .font(.display(16, .bold))
@@ -129,16 +138,38 @@ struct HomeView: View {
         .accessibilityLabel("Lanjutkan pertandingan, skor \(g.score.A) lawan \(g.score.B)")
     }
 
-    private func quickCard(_ q: Quick) -> some View {
-        let n = q.format == .single ? 1 : 2
+    /// Primary action when nothing is in progress: the last settings and names, one tap.
+    private func againCard(_ last: MatchConfig) -> some View {
+        Button { onQuickStart(last) } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Main lagi").font(.display(24, .heavy))
+                (Text(last.headTitle(.A)).foregroundColor(Theme.redMid)
+                    + Text(" vs ").foregroundColor(.white.opacity(0.8))
+                    + Text(last.headTitle(.B)).foregroundColor(Theme.blueMid))
+                    .font(.display(16, .bold))
+                    .lineLimit(1)
+                Text(last.modeLabel).font(.subheadline).foregroundStyle(.white.opacity(0.8))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(18)
+            .background(Theme.ink, in: .rect(cornerRadius: 22, style: .continuous))
+            .shadow(color: Theme.ink.opacity(0.22), radius: 12, y: 6)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Main lagi, \(last.headTitle(.A)) lawan \(last.headTitle(.B)), \(last.modeLabel)")
+    }
+
+    private func quickCard(_ format: Format, _ title: String) -> some View {
+        let n = format == .single ? 1 : 2
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 ForEach(0..<n, id: \.self) { _ in Circle().fill(Theme.red).frame(width: 16, height: 16) }
                 Text("vs").font(.caption.weight(.bold)).foregroundStyle(Theme.muted)
                 ForEach(0..<n, id: \.self) { _ in Circle().fill(Theme.blue).frame(width: 16, height: 16) }
             }
-            Text(q.title).font(.display(22, .heavy)).foregroundStyle(Theme.ink)
-            Text(q.sub).font(.subheadline).foregroundStyle(Theme.muted)
+            Text(title).font(.display(22, .heavy)).foregroundStyle(Theme.ink)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .card()

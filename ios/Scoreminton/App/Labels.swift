@@ -26,6 +26,16 @@ extension MatchConfig {
         return n.isEmpty ? playersLine(s) : n
     }
 
+    /// Short headline for tight spots (scoreboard header, resume card, modals). The court tiles
+    /// already show each player, so doubles without typed names read "Tim A", not "Pemain A1 / Pemain A2".
+    func headTitle(_ s: Side) -> String {
+        let n = teams[s].name.trimmed
+        if !n.isEmpty { return n }
+        if format == .single { return playerName(s, 0) }
+        if (0..<2).allSatisfy({ typed(s, $0).isEmpty }) { return teamName(s) }
+        return "\(shortName(s, 0)) & \(shortName(s, 1))"
+    }
+
     var modeLabel: String {
         var parts = [
             format == .single ? "Single" : "Double",

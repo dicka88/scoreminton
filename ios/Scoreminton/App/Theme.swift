@@ -16,7 +16,7 @@ enum Theme {
     static let paper = Color(hex: 0xF3F5FA)
     static let card = Color.white
     static let ink = Color(hex: 0x1F2537)
-    static let muted = Color(hex: 0x687086)
+    static let muted = Color(hex: 0x5F677C) // ≥ 4.5:1 on paper and field
     static let line = Color(hex: 0xE3E7EF)
     static let field = Color(hex: 0xEEF1F7)
 

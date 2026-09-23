@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		223A9009570844D6682BCF6A /* ScoremintonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D80469308A7A087FF6458775 /* ScoremintonApp.swift */; };
+		36479660BCB0DE09381ABC8D /* PreviewSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47069DCCD649C5B70F5CEB7C /* PreviewSupport.swift */; };
 		39F43B733E0FF27E1BE55E52 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6AD2D5EF0812CE93F13D8B /* SetupView.swift */; };
 		46921B0AA741979A7CDD84AA /* EngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBADC2EECCA471DA9346C7B /* EngineTests.swift */; };
-		527F4729306365C700777260 /* PreviewSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527F4728306365C700777260 /* PreviewSupport.swift */; };
 		5C1337AA5F7124E45081FB78 /* TeamPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE104CB0AB51E6429255BE8 /* TeamPanel.swift */; };
 		5DE9EC21F846C4C896C406A9 /* SmokeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECCBFCC6682A42047FBEEACA /* SmokeUITests.swift */; };
 		667E8D28302575C65C5BA20F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B065BCD72C37480AED6429 /* Theme.swift */; };
@@ -25,6 +25,7 @@
 		AB172F532E5CC8D00E63CD6F /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6885E9CDC95ACC374E1568 /* Storage.swift */; };
 		B502494773A587D30F1D923E /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4248BE85577590CE1167789 /* Types.swift */; };
 		DCC023456D56880E7BE57A96 /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B9EB374477806C025BF8F3 /* Match.swift */; };
+		E09A4E124E68E8309E193479 /* StoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F32A787D9B1F10BFB60DF86C /* StoreTests.swift */; };
 		F2DB8C1967F37CCADA49742F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B0409BB9FF10CC8A883F8C /* HomeView.swift */; };
 /* End PBXBuildFile section */
 
@@ -48,10 +49,10 @@
 /* Begin PBXFileReference section */
 		02C5226E2DB431866B459EE3 /* Labels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Labels.swift; sourceTree = "<group>"; };
 		307A385F05F81F5F58D9B880 /* ScoreboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreboardView.swift; sourceTree = "<group>"; };
+		47069DCCD649C5B70F5CEB7C /* PreviewSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewSupport.swift; sourceTree = "<group>"; };
 		49360551A0F412FF02D2E360 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
-		527F4728306365C700777260 /* PreviewSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewSupport.swift; sourceTree = "<group>"; };
 		5A6AD2D5EF0812CE93F13D8B /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
-		6448E4A0D578D4E1D70121E1 /* Scoreminton.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scoreminton.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6448E4A0D578D4E1D70121E1 /* Scoreminton.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Scoreminton.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BCB977A82ABD5E1AC58614A /* LandscapeScreensUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandscapeScreensUITests.swift; sourceTree = "<group>"; };
 		9F6885E9CDC95ACC374E1568 /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		B009016EE173FFB131F341CD /* Icons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Icons.swift; sourceTree = "<group>"; };
@@ -63,10 +64,11 @@
 		D2A0D811BD62BB7B88F8D5F5 /* MatchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchStore.swift; sourceTree = "<group>"; };
 		D80469308A7A087FF6458775 /* ScoremintonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoremintonApp.swift; sourceTree = "<group>"; };
 		DAE104CB0AB51E6429255BE8 /* TeamPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamPanel.swift; sourceTree = "<group>"; };
-		E3ED2840A8B278707407059D /* ScoremintonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScoremintonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E3ED2840A8B278707407059D /* ScoremintonUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ScoremintonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5B065BCD72C37480AED6429 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		E6D8F8B1B58B6F22E0E18522 /* ScoremintonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScoremintonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E6D8F8B1B58B6F22E0E18522 /* ScoremintonTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ScoremintonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECCBFCC6682A42047FBEEACA /* SmokeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeUITests.swift; sourceTree = "<group>"; };
+		F32A787D9B1F10BFB60DF86C /* StoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreTests.swift; sourceTree = "<group>"; };
 		FF31CD3509B881EB84878F0C /* Rules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rules.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -106,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				BBBADC2EECCA471DA9346C7B /* EngineTests.swift */,
+				F32A787D9B1F10BFB60DF86C /* StoreTests.swift */,
 			);
 			path = ScoremintonTests;
 			sourceTree = "<group>";
@@ -155,9 +158,9 @@
 			isa = PBXGroup;
 			children = (
 				02C5226E2DB431866B459EE3 /* Labels.swift */,
+				47069DCCD649C5B70F5CEB7C /* PreviewSupport.swift */,
 				D80469308A7A087FF6458775 /* ScoremintonApp.swift */,
 				E5B065BCD72C37480AED6429 /* Theme.swift */,
-				527F4728306365C700777260 /* PreviewSupport.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -243,12 +246,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2700;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					0F6D8DA5C33AB78B0A846A53 = {
 						DevelopmentTeam = "";
 					};
 					63F6B922EC51F0D554DD40D4 = {
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					714D4DE2D73BA4DDAA4A13BE = {
@@ -300,6 +304,7 @@
 				A341FA7AD56317B1D757D1BF /* Labels.swift in Sources */,
 				DCC023456D56880E7BE57A96 /* Match.swift in Sources */,
 				8FA502FF5B7276E0F5D9A062 /* MatchStore.swift in Sources */,
+				36479660BCB0DE09381ABC8D /* PreviewSupport.swift in Sources */,
 				7F8F2FFB2A362EA70F9FCBEF /* Rules.swift in Sources */,
 				A79CF2D19B4FD8B76BE48D95 /* ScoreboardView.swift in Sources */,
 				223A9009570844D6682BCF6A /* ScoremintonApp.swift in Sources */,
@@ -307,7 +312,6 @@
 				AB172F532E5CC8D00E63CD6F /* Storage.swift in Sources */,
 				5C1337AA5F7124E45081FB78 /* TeamPanel.swift in Sources */,
 				667E8D28302575C65C5BA20F /* Theme.swift in Sources */,
-				527F4729306365C700777260 /* PreviewSupport.swift in Sources */,
 				B502494773A587D30F1D923E /* Types.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -326,6 +330,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				46921B0AA741979A7CDD84AA /* EngineTests.swift in Sources */,
+				E09A4E124E68E8309E193479 /* StoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -383,7 +388,6 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -397,7 +401,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -412,14 +415,13 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 39ZN3AD7FA;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Scoreminton;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -430,10 +432,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = id.sonar.scoreminton;
 				PRODUCT_NAME = Scoreminton;
 				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -446,14 +444,13 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 39ZN3AD7FA;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Scoreminton;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -464,10 +461,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = id.sonar.scoreminton;
 				PRODUCT_NAME = Scoreminton;
 				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -527,7 +520,6 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -548,7 +540,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

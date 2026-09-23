@@ -54,7 +54,7 @@ final class LandscapeScreensUITests: XCTestCase {
 
         tapTimes(a, 5)
         tapTimes(b, 2)
-        sleep(3) // let toast go
+        sleep(1) // let the "+1" badge fade
         snap("4-board-5-2")
 
         tapTimes(a, 4) // 9-2 → interval at 11

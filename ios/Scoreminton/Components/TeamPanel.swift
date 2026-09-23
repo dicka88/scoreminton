@@ -31,7 +31,8 @@ struct TeamPanel: View {
     private var won: Int { match.gamesWon[side] }
     private var fresh: Bool { g.rallies.isEmpty }
     private var playing: Bool { match.status == .playing }
-    private var gamePoint: Bool { playing && cfg.isGamePoint(g.score, side) }
+    /// Service-over: only the serving side can score on the next rally.
+    private var gamePoint: Bool { playing && (cfg.scoring == .rally || serving) && cfg.isGamePoint(g.score, side) }
     private var matchPoint: Bool { gamePoint && won == cfg.gamesToWin - 1 }
     private var color: Color { Theme.team(side) }
 
@@ -113,7 +114,9 @@ struct TeamPanel: View {
                     if playing && fresh && match.games.count == 1 {
                         Text("Tap di sini kalau menang rally")
                             .font(.display(14 * k, .semibold))
-                            .foregroundStyle(.white.opacity(0.85))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14).padding(.vertical, 6)
+                            .background(.black.opacity(0.2), in: .capsule)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                             .minimumScaleFactor(0.8)
@@ -129,6 +132,7 @@ struct TeamPanel: View {
             .frame(maxHeight: .infinity)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(cfg.sideTitle(side)), skor \(g.score[side])")
+            .accessibilityValue(duty)
             .accessibilityHint("Ketuk dua kali untuk poin tim ini")
             .accessibilityAddTraits(.isButton)
             .accessibilityAction { hit() }
@@ -178,7 +182,7 @@ struct TeamPanel: View {
     }
 
     private func teamName(compact: Bool) -> some View {
-        Text(cfg.sideTitle(side))
+        Text(cfg.headTitle(side))
             .font(.display((compact ? 16 : 18) * k, .heavy))
             .foregroundStyle(.white)
             .lineLimit(landscape ? 2 : 1)
@@ -191,7 +195,7 @@ struct TeamPanel: View {
             if fresh && playing { prestartChips }
             status
                 .font(.system(size: 15 * k, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(.white)
                 .lineLimit(3)
                 .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -216,6 +220,12 @@ struct TeamPanel: View {
         }
     }
 
+    /// Spoken after the score: who serves from where, or who receives.
+    private var duty: String {
+        let who = cfg.playerName(side, active)
+        return serving ? "\(who) servis dari kotak \(courtWord(court))" : "\(who) menerima"
+    }
+
     @ViewBuilder private var status: some View {
         let who = cfg.playerName(side, active)
         if serving {
@@ -238,7 +248,7 @@ struct TeamPanel: View {
                 .lineLimit(1)
                 .fixedSize()
                 .padding(.horizontal, 12)
-                .frame(minHeight: 36 * k)
+                .frame(minHeight: 44 * k)
                 .background(.white, in: .capsule)
         }
         .buttonStyle(.plain)
