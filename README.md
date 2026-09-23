@@ -10,6 +10,10 @@
 </p>
 
 <p align="center">
+  <a href="https://scoreminton.vercel.app"><b>Coba sekarang → scoreminton.vercel.app</b></a>
+</p>
+
+<p align="center">
   <img src="docs/screenshots/scoreboard-landscape.webp" alt="Papan skor landscape: Cici & Dodi 20 (game point, servis dari kotak kanan) melawan Budi & Andi 18 di game 2" width="820">
 </p>
 
