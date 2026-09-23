@@ -109,6 +109,7 @@ export default function TeamPanel({ match, side, pos, onScore, onSwapPositions, 
         <header className="panel-head">
           <span className="team-tag">{side}</span>
           <span className="team-name">{headTitle(cfg, side)}</span>
+          {gamePoint && <span className="point-badge in-head">{matchPoint ? 'Match point' : 'Game point'}</span>}
           {serving && (
             <span className="serve-pill">
               <Shuttlecock /> <span className="serve-pill-text">Servis</span>

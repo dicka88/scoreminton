@@ -1,8 +1,36 @@
-# Scoreminton
+<p align="center">
+  <img src="public/icon-512.png" alt="Ikon Scoreminton" width="112" height="112">
+</p>
 
-Papan skor badminton untuk pinggir lapangan — web app / PWA, mobile-first, landscape diutamakan, plus port native iOS (SwiftUI).
+<h1 align="center">Scoreminton</h1>
+
+<p align="center">
+  Papan skor badminton untuk pinggir lapangan.<br>
+  Web app / PWA, mobile-first, landscape diutamakan, plus port native iOS (SwiftUI).
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/scoreboard-landscape.webp" alt="Papan skor landscape: Cici & Dodi 20 (game point, servis dari kotak kanan) melawan Budi & Andi 18 di game 2" width="820">
+</p>
 
 Satu tap = satu rally. Siapa yang servis, dari kotak mana, siapa yang menerima, kapan interval, dan kapan pindah sisi diatur otomatis. Tanpa akun, tanpa iklan, tetap jalan offline.
+
+## Tampilan
+
+<table>
+  <tr>
+    <td align="center" width="25%"><img src="docs/screenshots/home.webp" alt="Beranda: Main lagi dan mulai cepat 2×2"></td>
+    <td align="center" width="25%"><img src="docs/screenshots/setup.webp" alt="Atur pertandingan: format, sistem poin, target, deuce"></td>
+    <td align="center" width="25%"><img src="docs/screenshots/scoreboard-portrait.webp" alt="Papan skor portrait dengan game point"></td>
+    <td align="center" width="25%"><img src="docs/screenshots/match-over.webp" alt="Akhir pertandingan: Budi & Andi menang 21–17, 18–21, 21–10"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Beranda</sub></td>
+    <td align="center"><sub>Atur pertandingan</sub></td>
+    <td align="center"><sub>Papan skor (portrait)</sub></td>
+    <td align="center"><sub>Akhir pertandingan</sub></td>
+  </tr>
+</table>
 
 ## Fitur
 
@@ -73,6 +101,7 @@ src/
   hooks/        Wake Lock, fullscreen, getar
   labels.ts     teks nama tim/pemain & format
 ios/            port native SwiftUI (lihat di bawah)
+docs/           screenshot untuk README
 PRD.md          spesifikasi produk
 ```
 

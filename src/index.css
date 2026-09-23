@@ -1073,11 +1073,16 @@ input {
   align-content: center;
   gap: 10px;
   min-height: 0;
+  /* digits size to the space left in the card, so they never run into the header or footer */
+  container-type: size;
 }
 .score {
+  --score-max: min(50dvh, 22vw);
+  /* always leave room for the game-point badge / tap hint, so digits never change size mid-game */
+  --score-fit: calc((100cqh - 54px) / 0.95);
   font-weight: 600;
   line-height: 0.9;
-  font-size: min(50dvh, 22vw);
+  font-size: min(var(--score-max), var(--score-fit));
   color: var(--fg);
   animation: pop 0.3s var(--ease-out);
 }
@@ -1085,6 +1090,10 @@ input {
   from {
     transform: scale(0.9);
   }
+}
+/* one badge lives above the digits (landscape), the other in the header (portrait) */
+.point-badge.in-head {
+  display: none;
 }
 .point-badge {
   position: relative;
@@ -1474,7 +1483,7 @@ input {
     --svc-w: clamp(100px, 29%, 230px);
   }
   .score {
-    font-size: min(48dvh, 19.5vw);
+    --score-max: min(48dvh, 19.5vw);
   }
   .box {
     padding: 5px 3px;
@@ -1521,7 +1530,18 @@ input {
     text-align: left;
   }
   .score {
-    font-size: min(22dvh, 44vw);
+    --score-max: min(30dvh, 44vw);
+    --score-fit: calc(100cqh / 0.95);
+  }
+  .score-wrap:has(> .tap-hint) .score {
+    --score-fit: calc((100cqh - 54px) / 0.95);
+  }
+  .point-badge.in-head {
+    display: inline-block;
+    flex: none;
+  }
+  .score-wrap > .point-badge {
+    display: none;
   }
   .svc,
   .svc[data-pos='left'],
