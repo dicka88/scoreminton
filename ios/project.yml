@@ -1,0 +1,69 @@
+name: Scoreminton
+options:
+  bundleIdPrefix: id.sonar
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""
+targets:
+  Scoreminton:
+    type: application
+    platform: iOS
+    sources:
+      - Scoreminton
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: id.sonar.scoreminton
+        PRODUCT_NAME: Scoreminton
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Scoreminton
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UIStatusBarHidden: NO
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown"
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.sports
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+  ScoremintonTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - ScoremintonTests
+    dependencies:
+      - target: Scoreminton
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: id.sonar.scoreminton.tests
+  ScoremintonUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - ScoremintonUITests
+    dependencies:
+      - target: Scoreminton
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: id.sonar.scoreminton.uitests
+        TEST_TARGET_NAME: Scoreminton
+schemes:
+  Scoreminton:
+    build:
+      targets:
+        Scoreminton: all
+        ScoremintonTests: [test]
+        ScoremintonUITests: [test]
+    test:
+      targets:
+        - ScoremintonTests
+        - ScoremintonUITests
